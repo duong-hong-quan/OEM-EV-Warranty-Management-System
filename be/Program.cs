@@ -1,4 +1,4 @@
-using ElectricVehicleWarranty.Data;
+using BE.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

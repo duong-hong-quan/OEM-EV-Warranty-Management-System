@@ -1,9 +1,8 @@
-using ElectricVehicleWarranty.Data;
-using ElectricVehicleWarranty.Models;
+using BE.DAL.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ElectricVehicleWarranty.Controllers
+namespace BE.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

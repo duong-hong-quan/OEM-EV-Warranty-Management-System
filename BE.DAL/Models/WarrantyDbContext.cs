@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using ElectricVehicleWarranty.Models;
 
-namespace ElectricVehicleWarranty.Data
+namespace BE.DAL.Models
 {
-    public class WarrantyDbContext : DbContext
+    public class WarrantyDbContext : DbContext, IDbContext
     {
         public WarrantyDbContext(DbContextOptions<WarrantyDbContext> options) : base(options) { }
 
@@ -15,7 +14,7 @@ namespace ElectricVehicleWarranty.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // ...existing code...
+
         }
     }
 }
