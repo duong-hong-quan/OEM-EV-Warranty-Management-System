@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BE.DAL
+namespace BE.DAL.UOW
 {
     public interface IUnitOfWork
     {
