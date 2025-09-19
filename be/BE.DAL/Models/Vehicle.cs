@@ -10,6 +10,7 @@ namespace BE.DAL.Models
     {
         public Guid Id { get; set; }
         public string VIN { get; set; }
+        public string VehicleName { get; set; }
         public Guid CustomerId { get; set; }
         public Customer Customer { get; set; }
         public List<Part> Parts { get; set; }

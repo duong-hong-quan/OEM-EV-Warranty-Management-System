@@ -13,6 +13,7 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 	</ItemGroup>
 	<ItemGroup>
+	  <ProjectReference Include="..\BE.Common\BE.Common.csproj" />
 	  <ProjectReference Include="..\BE.DAL\BE.DAL.csproj" />
 	</ItemGroup>
 </Project>
