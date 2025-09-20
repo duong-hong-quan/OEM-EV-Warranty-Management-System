@@ -1,4 +1,6 @@
+using BE.Common;
 using BE.DAL.Models;
+using BE.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,26 +10,32 @@ namespace BE.API.Controllers
     [Route("api/[controller]")]
     public class CustomersController : ControllerBase
     {
-        private readonly WarrantyDbContext _context;
-        public CustomersController(WarrantyDbContext context)
+        private ICustomerService _service;
+        public CustomersController(ICustomerService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(int pageNumber, int pageSize, string keyword)
         {
-            var customers = await _context.Customers.Include(c => c.Vehicles).ToListAsync();
+            var customers = await _service.Get(new DAL.DTO.QueryOptions<Customer>
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                Filter = s => s.Name.Contains(keyword) || s.Phone.Contains(keyword),
+                OrderBy = new List<(string PropertyName, bool Ascending)>
+                {
+                    (nameof(Customer.Name), true)
+                },
+            });
             return Ok(customers);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Customer customer)
+        public async Task<IActionResult> Create(CustomerDTO customer)
         {
-            customer.Id = Guid.NewGuid();
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
-            return Ok(customer);
+            return await _service.Create(customer) is Customer createdCustomer ? Ok(createdCustomer) : BadRequest();
         }
     }
 }

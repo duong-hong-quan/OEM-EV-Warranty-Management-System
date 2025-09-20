@@ -20,8 +20,6 @@ namespace BE.DAL.Models
         DatabaseFacade Database { get; }
         IModel Model { get; }
 
-
-
     }
 
 }
