@@ -1,6 +1,7 @@
+using BE.Common;
 using BE.DAL.Models;
+using BE.Services.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BE.API.Controllers
 {
@@ -8,26 +9,85 @@ namespace BE.API.Controllers
     [Route("api/[controller]")]
     public class PartsController : ControllerBase
     {
-        private readonly WarrantyDbContext _context;
-        public PartsController(WarrantyDbContext context)
+        private readonly IPartService _partService;
+        
+        public PartsController(IPartService partService)
         {
-            _context = context;
+            _partService = partService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var parts = await _context.Parts.ToListAsync();
-            return Ok(parts);
+            try
+            {
+                var parts = await _partService.GetAllPartsAsync();
+                return Ok(parts);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            try
+            {
+                var part = await _partService.GetPartByIdAsync(id);
+                if (part == null)
+                    return NotFound();
+                return Ok(part);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Part part)
+        public async Task<IActionResult> Create(PartDTO partDto)
         {
-            part.Id = Guid.NewGuid();
-            _context.Parts.Add(part);
-            await _context.SaveChangesAsync();
-            return Ok(part);
+            try
+            {
+                var part = await _partService.CreatePartAsync(partDto);
+                return CreatedAtAction(nameof(GetById), new { id = part.Id }, part);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update(PartDTO partDto)
+        {
+            try
+            {
+                var part = await _partService.UpdatePartAsync(partDto);
+                return Ok(part);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                var success = await _partService.DeletePartAsync(id);
+                if (!success)
+                    return NotFound();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

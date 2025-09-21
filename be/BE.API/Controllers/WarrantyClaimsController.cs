@@ -1,6 +1,7 @@
+using BE.Common;
 using BE.DAL.Models;
+using BE.Services.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BE.API.Controllers
 {
@@ -8,28 +9,99 @@ namespace BE.API.Controllers
     [Route("api/[controller]")]
     public class WarrantyClaimsController : ControllerBase
     {
-        private readonly WarrantyDbContext _context;
-        public WarrantyClaimsController(WarrantyDbContext context)
+        private readonly IWarrantyClaimService _warrantyClaimService;
+        
+        public WarrantyClaimsController(IWarrantyClaimService warrantyClaimService)
         {
-            _context = context;
+            _warrantyClaimService = warrantyClaimService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var claims = await _context.WarrantyClaims.ToListAsync();
-            return Ok(claims);
+            try
+            {
+                var claims = await _warrantyClaimService.GetAllWarrantyClaimsAsync();
+                return Ok(claims);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            try
+            {
+                var claim = await _warrantyClaimService.GetWarrantyClaimByIdAsync(id);
+                if (claim == null)
+                    return NotFound();
+                return Ok(claim);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(WarrantyClaim claim)
+        public async Task<IActionResult> Create(WarrantyClaimDTO claimDto)
         {
-            claim.Id = Guid.NewGuid();
-            claim.ClaimDate = DateTime.UtcNow;
-            claim.Status = "Sent";
-            _context.WarrantyClaims.Add(claim);
-            await _context.SaveChangesAsync();
-            return Ok(claim);
+            try
+            {
+                var claim = await _warrantyClaimService.CreateWarrantyClaimAsync(claimDto);
+                return CreatedAtAction(nameof(GetById), new { id = claim.Id }, claim);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update(WarrantyClaimDTO claimDto)
+        {
+            try
+            {
+                var claim = await _warrantyClaimService.UpdateWarrantyClaimAsync(claimDto);
+                return Ok(claim);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                var success = await _warrantyClaimService.DeleteWarrantyClaimAsync(id);
+                if (!success)
+                    return NotFound();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("vehicle/{vehicleId}")]
+        public async Task<IActionResult> GetByVehicleId(Guid vehicleId)
+        {
+            try
+            {
+                var result = await _warrantyClaimService.GetByVehicleIdAsync(vehicleId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

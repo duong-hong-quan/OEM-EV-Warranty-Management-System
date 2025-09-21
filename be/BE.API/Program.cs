@@ -1,4 +1,8 @@
 using BE.DAL.Models;
+using BE.DAL.GenericRepository;
+using BE.DAL.UOW;
+using BE.Services.Services;
+using BE.Services.Services.Implemetation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +17,16 @@ builder.Services.AddSwaggerGen();
 // Add PostgreSQL EF Core DbContext
 builder.Services.AddDbContext<WarrantyDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register generic repository and unit of work
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Register services
+builder.Services.AddScoped<IPartService, PartService>();
+builder.Services.AddScoped<IServiceHistoryService, ServiceHistoryService>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<IWarrantyClaimService, WarrantyClaimService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>

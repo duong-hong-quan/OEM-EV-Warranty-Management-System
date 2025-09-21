@@ -1,0 +1,147 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BE.Common;
+using BE.DAL.GenericRepository;
+using BE.DAL.Models;
+using BE.DAL.UOW;
+
+namespace BE.Services.Services.Implemetation
+{
+    public class VehicleService : BaseService, IVehicleService
+    {
+        private IGenericRepository<Vehicle> _vehicleRepo;
+        private IUnitOfWork _unitOfWork;
+
+        public VehicleService(IServiceProvider serviceProvider, IGenericRepository<Vehicle> vehicleRepo, IUnitOfWork unitOfWork) : base(serviceProvider)
+        {
+            _vehicleRepo = vehicleRepo;
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<Part> AddPartIntoVehicle(Guid vehicleId, PartDTO part)
+        {
+            var vehicle = await _vehicleRepo.GetById(vehicleId);
+            if (vehicle == null)
+            {
+                throw new Exception("Vehicle not found");
+            }
+            Part entity = new Part();
+            entity.Id = Guid.NewGuid();
+            entity.Name = part.Name;
+            entity.SerialNumber = part.SerialNumber;
+            entity.VehicleId = vehicleId;
+            await _unitOfWork.ExecuteInTransaction(async () =>
+            {
+                var partRepo = Resolve<IGenericRepository<Part>>();
+                await partRepo.Insert(entity);
+
+            });
+            await _unitOfWork.SaveChangesAsync();
+            return entity;
+
+        }
+
+        public async Task<Part> EditPartVehicle(PartDTO part)
+        {
+            if (part == null || part.Id == Guid.Empty)
+                throw new ArgumentException("Invalid part data");
+
+            var partRepo = Resolve<IGenericRepository<Part>>();
+            var existingPart = await partRepo.GetById(part.Id);
+
+            if (existingPart == null)
+                throw new Exception("Part not found");
+
+            existingPart.Name = part.Name;
+            existingPart.SerialNumber = part.SerialNumber;
+
+            await _unitOfWork.ExecuteInTransaction(async () =>
+            {
+                await partRepo.Update(existingPart);
+            });
+
+            await _unitOfWork.SaveChangesAsync();
+            return existingPart;
+        }
+
+
+        public async Task<Part> RemovePartVehicle(Guid partId)
+        {
+            if (partId == Guid.Empty)
+                throw new ArgumentException("Invalid part Id");
+
+            var partRepo = Resolve<IGenericRepository<Part>>();
+            var existingPart = await partRepo.GetById(partId);
+
+            if (existingPart == null)
+                throw new Exception("Part not found");
+
+            await partRepo.DeleteById(partId);
+
+            await _unitOfWork.SaveChangesAsync();
+            return existingPart;
+        }
+
+        // New DTO-based CRUD methods
+        public async Task<IEnumerable<Vehicle>> GetAllVehiclesAsync()
+        {
+            return await _vehicleRepo.GetAll();
+        }
+
+        public async Task<Vehicle> GetVehicleByIdAsync(Guid id)
+        {
+            return await _vehicleRepo.GetById(id);
+        }
+
+        public async Task<Vehicle> CreateVehicleAsync(VehicleDTO vehicleDto)
+        {
+            var vehicle = new Vehicle
+            {
+                Id = Guid.NewGuid(),
+                VIN = vehicleDto.VIN,
+                VehicleName = vehicleDto.VehicleName,
+                CustomerId = vehicleDto.CustomerId
+            };
+
+            await _vehicleRepo.Insert(vehicle);
+            await _unitOfWork.SaveChangesAsync();
+            
+            return vehicle;
+        }
+
+        public async Task<Vehicle> UpdateVehicleAsync(VehicleDTO vehicleDto)
+        {
+            if (vehicleDto.Id == null)
+                throw new ArgumentException("Vehicle ID is required for update");
+
+            var existingVehicle = await _vehicleRepo.GetById(vehicleDto.Id.Value);
+            if (existingVehicle == null)
+                throw new Exception("Vehicle not found");
+
+            existingVehicle.VIN = vehicleDto.VIN;
+            existingVehicle.VehicleName = vehicleDto.VehicleName;
+            existingVehicle.CustomerId = vehicleDto.CustomerId;
+
+            await _vehicleRepo.Update(existingVehicle);
+            await _unitOfWork.SaveChangesAsync();
+
+            return existingVehicle;
+        }
+
+        public async Task<bool> DeleteVehicleAsync(Guid id)
+        {
+            var vehicle = await _vehicleRepo.GetById(id);
+            if (vehicle == null)
+                return false;
+
+            await _vehicleRepo.Delete(vehicle);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
+        }
+
+    }
+}
