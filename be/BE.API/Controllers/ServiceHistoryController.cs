@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BE.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/service-history")]
     public class ServiceHistoryController : ControllerBase
     {
         private readonly IServiceHistoryService _serviceHistoryService;

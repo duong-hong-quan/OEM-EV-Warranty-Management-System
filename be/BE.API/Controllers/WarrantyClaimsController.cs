@@ -1,12 +1,14 @@
 using BE.Common;
 using BE.DAL.Models;
 using BE.Services.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BE.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/warranty-claim")]
+    [Authorize] // Require authentication
     public class WarrantyClaimsController : ControllerBase
     {
         private readonly IWarrantyClaimService _warrantyClaimService;
@@ -17,6 +19,7 @@ namespace BE.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Manager")] // Only staff can see all claims
         public async Task<IActionResult> GetAll()
         {
             try

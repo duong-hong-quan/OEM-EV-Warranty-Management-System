@@ -1,12 +1,14 @@
 using BE.Common;
 using BE.DAL.Models;
 using BE.Services.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BE.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/part")]
+    [Authorize] // Require authentication for all endpoints
     public class PartsController : ControllerBase
     {
         private readonly IPartService _partService;
@@ -47,6 +49,7 @@ namespace BE.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Manager,Technician")] // Only staff can create parts
         public async Task<IActionResult> Create(PartDTO partDto)
         {
             try
@@ -75,6 +78,7 @@ namespace BE.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")] // Only Admin can delete parts
         public async Task<IActionResult> Delete(Guid id)
         {
             try
