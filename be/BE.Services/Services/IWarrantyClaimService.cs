@@ -11,7 +11,7 @@ namespace BE.Services.Services
 {
     public interface IWarrantyClaimService
     {
-        Task<IEnumerable<WarrantyClaim>> GetAllWarrantyClaimsAsync();
+        Task<PagedResult<WarrantyClaim>> GetAllWarrantyClaimsAsync();
         Task<WarrantyClaim> GetWarrantyClaimByIdAsync(Guid id);
         Task<WarrantyClaim> CreateWarrantyClaimAsync(WarrantyClaimDTO claimDto);
         Task<WarrantyClaim> UpdateWarrantyClaimAsync(WarrantyClaimDTO claimDto);
@@ -24,5 +24,4 @@ namespace BE.Services.Services
         Task<WarrantyClaim> RemoveClaim(Guid id);
         Task<PagedResult<WarrantyClaim>> GetByVehicleId(Guid vehicleId);
     }
-}
 }

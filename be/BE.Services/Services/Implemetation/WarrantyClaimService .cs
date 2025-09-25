@@ -80,9 +80,14 @@ namespace BE.Services.Services.Implemetation
         }
 
         // New DTO-based methods
-        public async Task<IEnumerable<WarrantyClaim>> GetAllWarrantyClaimsAsync()
+        public async Task<PagedResult<WarrantyClaim>> GetAllWarrantyClaimsAsync()
         {
-            return await _claimRepo.GetAll();
+            return await _claimRepo.GetAllDataByExpression(
+                new QueryOptions<WarrantyClaim>
+                {
+                    PageNumber = 1,
+                    PageSize = int.MaxValue
+                });
         }
 
         public async Task<WarrantyClaim> GetWarrantyClaimByIdAsync(Guid id)
@@ -138,7 +143,7 @@ namespace BE.Services.Services.Implemetation
             if (claim == null)
                 return false;
 
-            await _claimRepo.Delete(claim);
+            await _claimRepo.DeleteById(claim);
             await _unitOfWork.SaveChangesAsync();
 
             return true;

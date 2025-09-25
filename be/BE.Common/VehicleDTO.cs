@@ -11,5 +11,6 @@ namespace BE.Common
         public Guid Id { get; set; }
         public string VIN { get; set; }
         public string VehicleName { get; set; }
+        public Guid CustomerId { get; set; }
     }
 }

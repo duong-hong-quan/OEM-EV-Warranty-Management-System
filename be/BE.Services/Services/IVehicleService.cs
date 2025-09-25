@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BE.Common;
+using BE.DAL.DTO;
 using BE.DAL.Models;
 
 namespace BE.Services.Services
 {
     public interface IVehicleService
     {
-        Task<IEnumerable<Vehicle>> GetAllVehiclesAsync();
+        Task<PagedResult<Vehicle>> GetAllVehiclesAsync();
         Task<Vehicle> GetVehicleByIdAsync(Guid id);
         Task<Vehicle> CreateVehicleAsync(VehicleDTO vehicleDto);
         Task<Vehicle> UpdateVehicleAsync(VehicleDTO vehicleDto);

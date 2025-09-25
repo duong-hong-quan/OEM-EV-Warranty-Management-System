@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BE.Common;
+using BE.DAL.DTO;
 using BE.DAL.GenericRepository;
 using BE.DAL.Models;
 using BE.DAL.UOW;
@@ -86,9 +87,14 @@ namespace BE.Services.Services.Implemetation
         }
 
         // New DTO-based CRUD methods
-        public async Task<IEnumerable<Vehicle>> GetAllVehiclesAsync()
+        public async Task<PagedResult<Vehicle>> GetAllVehiclesAsync()
         {
-            return await _vehicleRepo.GetAll();
+            return await _vehicleRepo.GetAllDataByExpression(new QueryOptions<Vehicle>
+            {
+                Filter = null,
+                PageNumber = 1,
+                PageSize = int.MaxValue
+            });
         }
 
         public async Task<Vehicle> GetVehicleByIdAsync(Guid id)
@@ -108,7 +114,7 @@ namespace BE.Services.Services.Implemetation
 
             await _vehicleRepo.Insert(vehicle);
             await _unitOfWork.SaveChangesAsync();
-            
+
             return vehicle;
         }
 
@@ -117,7 +123,7 @@ namespace BE.Services.Services.Implemetation
             if (vehicleDto.Id == null)
                 throw new ArgumentException("Vehicle ID is required for update");
 
-            var existingVehicle = await _vehicleRepo.GetById(vehicleDto.Id.Value);
+            var existingVehicle = await _vehicleRepo.GetById(vehicleDto.Id);
             if (existingVehicle == null)
                 throw new Exception("Vehicle not found");
 
@@ -137,7 +143,7 @@ namespace BE.Services.Services.Implemetation
             if (vehicle == null)
                 return false;
 
-            await _vehicleRepo.Delete(vehicle);
+            await _vehicleRepo.DeleteById(id);
             await _unitOfWork.SaveChangesAsync();
 
             return true;

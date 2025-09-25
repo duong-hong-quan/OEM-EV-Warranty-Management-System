@@ -89,9 +89,14 @@ namespace BE.Services.Services.Implemetation
         }
 
         // New DTO-based methods
-        public async Task<IEnumerable<ServiceHistory>> GetAllServiceHistoriesAsync()
+        public async Task<PagedResult<ServiceHistory>> GetAllServiceHistoriesAsync()
         {
-            return await _serviceHistoryRepo.GetAll();
+            return await _serviceHistoryRepo.GetAllDataByExpression(new QueryOptions<ServiceHistory>
+            {
+                Filter = null,
+                PageNumber = 1,
+                PageSize = int.MaxValue,
+            });
         }
 
         public async Task<ServiceHistory> GetServiceHistoryByIdAsync(Guid id)
@@ -142,7 +147,7 @@ namespace BE.Services.Services.Implemetation
             if (history == null)
                 return false;
 
-            await _serviceHistoryRepo.Delete(history);
+            await _serviceHistoryRepo.DeleteById(id);
             await _unitOfWork.SaveChangesAsync();
 
             return true;

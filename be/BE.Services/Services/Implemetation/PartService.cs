@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BE.Common;
+using BE.DAL.DTO;
 using BE.DAL.GenericRepository;
 using BE.DAL.Models;
 using BE.DAL.UOW;
@@ -21,9 +22,13 @@ namespace BE.Services.Services.Implemetation
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<Part>> GetAllPartsAsync()
+        public async Task<PagedResult<Part>> GetAllPartsAsync()
         {
-            return await _partRepo.GetAll();
+            return await _partRepo.GetAllDataByExpression(new DAL.DTO.QueryOptions<Part>
+            {
+                PageNumber = 1,
+                PageSize = int.MaxValue,
+            });
         }
 
         public async Task<Part> GetPartByIdAsync(Guid id)
@@ -72,7 +77,7 @@ namespace BE.Services.Services.Implemetation
             if (part == null)
                 return false;
 
-            await _partRepo.Delete(part);
+            await _partRepo.DeleteById(part);
             await _unitOfWork.SaveChangesAsync();
 
             return true;

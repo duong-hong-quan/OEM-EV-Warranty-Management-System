@@ -9,7 +9,7 @@ namespace BE.Services.Services
 {
     public interface IServiceHistoryService
     {
-        Task<IEnumerable<ServiceHistory>> GetAllServiceHistoriesAsync();
+        Task<PagedResult<ServiceHistory>> GetAllServiceHistoriesAsync();
         Task<ServiceHistory> GetServiceHistoryByIdAsync(Guid id);
         Task<ServiceHistory> CreateServiceHistoryAsync(ServiceHistoryDTO historyDto);
         Task<ServiceHistory> UpdateServiceHistoryAsync(ServiceHistoryDTO historyDto);
