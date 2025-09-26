@@ -8,9 +8,9 @@ namespace BE.Common
 {
     public class VehicleDTO
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         public string VIN { get; set; }
         public string VehicleName { get; set; }
-        public Guid CustomerId { get; set; }
+        public Guid? CustomerId { get; set; }
     }
 }

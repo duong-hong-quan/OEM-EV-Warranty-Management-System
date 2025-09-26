@@ -26,10 +26,7 @@ namespace BE.Services.Services.Implemetation
         {
             return await _customerRepo.GetAllDataByExpression(new QueryOptions<Customer>
             {
-                Includes = new List<Func<IQueryable<Customer>, IQueryable<Customer>>>
-                {
-                    query => query.Include(c => c.Vehicles),
-                },
+                Filter = null,
                 PageNumber = queryOptions.PageNumber,
                 PageSize = queryOptions.PageSize,
                 OrderBy = queryOptions.OrderBy
