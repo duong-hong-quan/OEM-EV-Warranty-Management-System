@@ -13,15 +13,15 @@ namespace BE.DAL.Models
         public string VIN { get; set; }
         public string VehicleName { get; set; }
         public Guid CustomerId { get; set; }
-        public Customer Customer { get; set; }
+        public Customer? Customer { get; set; }
         [JsonIgnore]
         public List<Part>? Parts { get; set; }
         [JsonIgnore]
 
-        public List<ServiceHistory> ServiceHistories { get; set; }
+        public List<ServiceHistory>? ServiceHistories { get; set; }
         [JsonIgnore]
 
 
-        public List<WarrantyClaim> WarrantyClaims { get; set; }
+        public List<WarrantyClaim>? WarrantyClaims { get; set; }
     }
 }

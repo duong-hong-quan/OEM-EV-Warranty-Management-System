@@ -11,7 +11,7 @@ namespace BE.DAL.Models
     {
         public Guid Id { get; set; }
         public Guid VehicleId { get; set; }
-        public Vehicle Vehicle { get; set; }
+        public Vehicle? Vehicle { get; set; }
         public DateTime ClaimDate { get; set; }
         public string Status { get; set; } // Sent, Pending, Accepted, Processed
         public string Report { get; set; }

@@ -10,7 +10,7 @@ namespace BE.DAL.Models
     {
         public Guid Id { get; set; }
         public Guid VehicleId { get; set; }
-        public Vehicle Vehicle { get; set; }
+        public Vehicle? Vehicle { get; set; }
         public DateTime ServiceDate { get; set; }
         public string Description { get; set; }
         public string Technician { get; set; }
