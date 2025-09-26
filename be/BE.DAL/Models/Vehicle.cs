@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BE.DAL.Models
@@ -13,8 +14,14 @@ namespace BE.DAL.Models
         public string VehicleName { get; set; }
         public Guid CustomerId { get; set; }
         public Customer Customer { get; set; }
-        public List<Part> Parts { get; set; }
+        [JsonIgnore]
+        public List<Part>? Parts { get; set; }
+        [JsonIgnore]
+
         public List<ServiceHistory> ServiceHistories { get; set; }
+        [JsonIgnore]
+
+
         public List<WarrantyClaim> WarrantyClaims { get; set; }
     }
 }
