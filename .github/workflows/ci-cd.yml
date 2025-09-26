@@ -31,23 +31,23 @@ jobs:
 
     - name: 📦 Restore Dependencies (Backend)
       run: |
-        cd be
+        cd be/BE.API
         dotnet restore BE.API.sln
 
     - name: 🏗️ Build Backend
       run: |
-        cd be
+        cd be/BE.API
         dotnet build BE.API.sln --no-restore --configuration Release
 
     - name: 🧪 Run Backend Tests
       run: |
-        cd be
+        cd be/BE.API
         dotnet test BE.API.sln --no-build --configuration Release --verbosity normal
 
     - name: 📁 Publish Backend
       run: |
-        cd be
-        dotnet publish BE.API/BE.API.csproj --no-build --configuration Release --output ./publish
+        cd be/BE.API
+        dotnet publish BE.API.csproj --no-build --configuration Release --output ../publish
 
     - name: 🗜️ Archive Backend Artifacts
       uses: actions/upload-artifact@v4
