@@ -116,11 +116,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // Seed demo users for testing
 using (var scope = app.Services.CreateScope())
