@@ -1,0 +1,281 @@
+name: CI/CD Pipeline - Electric Vehicle Warranty System
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  NODE_VERSION: '18'
+  SERVER_HOST: ${{ secrets.SERVER_HOST }}
+  SERVER_USER: ${{ secrets.SERVER_USER }}
+  SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+  LXC_CONTAINER: 'demo-net-seminar'
+
+jobs:
+  # Backend Build & Test Job
+  backend-build-test:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🔄 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 📦 Restore Dependencies (Backend)
+      run: |
+        cd be
+        dotnet restore BE.API.sln
+
+    - name: 🏗️ Build Backend
+      run: |
+        cd be
+        dotnet build BE.API.sln --no-restore --configuration Release
+
+    - name: 🧪 Run Backend Tests
+      run: |
+        cd be
+        dotnet test BE.API.sln --no-build --configuration Release --verbosity normal
+
+    - name: 📁 Publish Backend
+      run: |
+        cd be
+        dotnet publish BE.API/BE.API.csproj --no-build --configuration Release --output ./publish
+
+    - name: 🗜️ Archive Backend Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-artifacts
+        path: be/publish/
+        retention-days: 30
+
+  # Frontend Build & Test Job
+  frontend-build-test:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🔄 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🔧 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: 'fe/package-lock.json'
+
+    - name: 📦 Install Frontend Dependencies
+      run: |
+        cd fe
+        npm ci
+
+    - name: 🧹 Lint Frontend Code
+      run: |
+        cd fe
+        npm run lint || true  # Don't fail on lint warnings
+
+    - name: 🏗️ Build Frontend
+      run: |
+        cd fe
+        npm run build
+
+    - name: 🗜️ Archive Frontend Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-artifacts
+        path: fe/dist/
+        retention-days: 30
+
+  # Security Scan Job
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: [backend-build-test]
+    
+    steps:
+    - name: 🔄 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🛡️ Run Security Scan
+      uses: github/super-linter@v4
+      env:
+        DEFAULT_BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VALIDATE_ALL_CODEBASE: false
+        VALIDATE_CSHARP: true
+        VALIDATE_JAVASCRIPT_ES: true
+
+  # Deploy to Development
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    needs: [backend-build-test, frontend-build-test]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: development
+    
+    steps:
+    - name: 🔄 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 📥 Download Backend Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: backend-artifacts
+        path: ./backend-artifacts
+
+    - name: 📥 Download Frontend Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-artifacts
+        path: ./frontend-artifacts
+
+    - name: � Install sshpass
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sshpass
+
+    - name: 🚀 Deploy to Development Server
+      run: |
+        # Create deployment package
+        tar -czf deployment-dev.tar.gz backend-artifacts/ frontend-artifacts/ deployment/
+
+        # Upload to server using sshpass
+        sshpass -p "${{ env.SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no deployment-dev.tar.gz ${{ env.SERVER_USER }}@${{ env.SERVER_HOST }}:/tmp/
+
+        # Execute deployment on server using sshpass
+        sshpass -p "${{ env.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ env.SERVER_USER }}@${{ env.SERVER_HOST }} << 'EOF'
+          # Extract deployment package
+          cd /tmp
+          tar -xzf deployment-dev.tar.gz
+          
+          # Execute deployment in LXC container
+          lxc exec ${{ env.LXC_CONTAINER }} -- bash -c "
+            sudo bash deploy.sh
+          "
+        EOF
+
+  # Deploy to Production
+  deploy-prod:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [backend-build-test, frontend-build-test, security-scan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    
+    steps:
+    - name: 🔄 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 📥 Download Backend Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: backend-artifacts
+        path: ./backend-artifacts
+
+    - name: 📥 Download Frontend Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-artifacts
+        path: ./frontend-artifacts
+
+    - name: � Install sshpass
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sshpass
+
+    - name: 🚀 Deploy to Production Server
+      run: |
+        # Create deployment package
+        tar -czf deployment-prod.tar.gz backend-artifacts/ frontend-artifacts/ deployment/
+
+        # Upload to server using sshpass
+        sshpass -p "${{ env.SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no deployment-prod.tar.gz ${{ env.SERVER_USER }}@${{ env.SERVER_HOST }}:/tmp/
+
+        # Execute deployment on server using sshpass
+        sshpass -p "${{ env.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ env.SERVER_USER }}@${{ env.SERVER_HOST }} << 'EOF'
+          # Extract deployment package
+          cd /tmp
+          tar -xzf deployment-prod.tar.gz
+          
+          # Execute deployment in LXC container
+          lxc exec ${{ env.LXC_CONTAINER }} -- bash -c "
+            sudo bash deploy.sh
+          "
+        EOF
+
+    - name: 📧 Notify Deployment Success
+      if: success()
+      run: |
+        echo "✅ Production deployment successful!"
+        # Add notification logic here (Slack, email, etc.)
+
+    - name: 📧 Notify Deployment Failure
+      if: failure()
+      run: |
+        echo "❌ Production deployment failed!"
+        # Add notification logic here (Slack, email, etc.)
+
+  # Health Check Job
+  health-check:
+    name: Post-Deployment Health Check
+    runs-on: ubuntu-latest
+    needs: [deploy-prod]
+    if: always() && needs.deploy-prod.result == 'success'
+    
+    steps:
+    - name: 🏥 Health Check - Backend API
+      run: |
+        # Wait for services to start
+        sleep 30
+        
+        # Check API health
+        curl -f -s -o /dev/null -w "%{http_code}" \
+          "https://your-domain.com/api/health" || exit 1
+        
+        echo "✅ Backend API is healthy"
+
+    - name: 🏥 Health Check - Frontend
+      run: |
+        # Check frontend
+        curl -f -s -o /dev/null -w "%{http_code}" \
+          "https://your-domain.com/" || exit 1
+        
+        echo "✅ Frontend is healthy"
+
+# Cleanup old artifacts
+  cleanup:
+    name: Cleanup Old Artifacts
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: 🧹 Cleanup Old Artifacts
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const artifacts = await github.rest.actions.listArtifactsForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+          
+          const oldArtifacts = artifacts.data.artifacts.filter(artifact => {
+            const createdAt = new Date(artifact.created_at);
+            const daysOld = (Date.now() - createdAt) / (1000 * 60 * 60 * 24);
+            return daysOld > 7; // Delete artifacts older than 7 days
+          });
+          
+          for (const artifact of oldArtifacts) {
+            await github.rest.actions.deleteArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: artifact.id,
+            });
+          }
