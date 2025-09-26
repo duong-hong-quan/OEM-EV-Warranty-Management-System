@@ -109,7 +109,7 @@ namespace BE.Services.Services.Implemetation
                 Id = Guid.NewGuid(),
                 VIN = vehicleDto.VIN,
                 VehicleName = vehicleDto.VehicleName,
-                CustomerId = vehicleDto.CustomerId
+                CustomerId = (Guid)vehicleDto.CustomerId
             };
 
             await _vehicleRepo.Insert(vehicle);
@@ -129,7 +129,7 @@ namespace BE.Services.Services.Implemetation
 
             existingVehicle.VIN = vehicleDto.VIN;
             existingVehicle.VehicleName = vehicleDto.VehicleName;
-            existingVehicle.CustomerId = vehicleDto.CustomerId;
+            existingVehicle.CustomerId = (Guid)vehicleDto.CustomerId;
 
             await _vehicleRepo.Update(existingVehicle);
             await _unitOfWork.SaveChangesAsync();
