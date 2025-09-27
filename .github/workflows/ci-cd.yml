@@ -244,7 +244,7 @@ jobs:
         
         # Check API health
         curl -f -s -o /dev/null -w "%{http_code}" \
-          "https://your-domain.com/api/health" || exit 1
+          "https://seminar-dot-net.duckdns.org" || exit 1
         
         echo "✅ Backend API is healthy"
 
@@ -252,7 +252,7 @@ jobs:
       run: |
         # Check frontend
         curl -f -s -o /dev/null -w "%{http_code}" \
-          "https://your-domain.com/" || exit 1
+          "https://seminar-dot-net.duckdns.org" || exit 1
         
         echo "✅ Frontend is healthy"
 
