@@ -97,9 +97,16 @@ namespace BE.Services.Services.Implemetation
             });
         }
 
-        public async Task<Vehicle> GetVehicleByIdAsync(Guid id)
+        public async Task<PagedResult<Part>> GetVehicleByIdAsync(Guid id)
         {
-            return await _vehicleRepo.GetById(id);
+            var repository = Resolve<IGenericRepository<Part>>();
+            var data = await repository.GetAllDataByExpression(new QueryOptions<Part>
+            {
+                Filter = s => s.VehicleId == id,
+                PageNumber = 1,
+                PageSize = int.MaxValue
+            });
+            return data;
         }
 
         public async Task<Vehicle> CreateVehicleAsync(VehicleDTO vehicleDto)

@@ -12,7 +12,7 @@ namespace BE.Services.Services
     public interface IVehicleService
     {
         Task<PagedResult<Vehicle>> GetAllVehiclesAsync();
-        Task<Vehicle> GetVehicleByIdAsync(Guid id);
+         Task<PagedResult<Part>> GetVehicleByIdAsync(Guid id);
         Task<Vehicle> CreateVehicleAsync(VehicleDTO vehicleDto);
         Task<Vehicle> UpdateVehicleAsync(VehicleDTO vehicleDto);
         Task<bool> DeleteVehicleAsync(Guid id);
