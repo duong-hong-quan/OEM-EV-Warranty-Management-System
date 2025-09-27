@@ -339,8 +339,8 @@ npm run dev
 
 - **API Documentation**: `http://localhost:5000/swagger`
 - **Frontend Application**: `http://localhost:3000`
-- **GitHub Repository**: [Your Repository URL]
-- **Company Website**: [TGL Solutions Website]
+- **GitHub Repository**: `https://github.com/duong-hong-quan/OEM-EV-Warranty-Management-System`
+- **Company Website**: `https://tgl-sol.com`
 
 
 ## 🤝 Đóng góp / Contributing
