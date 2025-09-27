@@ -139,11 +139,11 @@ namespace BE.Services.Services.Implemetation
 
         public async Task<bool> DeleteVehicleAsync(Guid id)
         {
-            var vehicle = await _vehicleRepo.GetById(id);
+            var vehicle = await _vehicleRepo.GetByExpression(s=> s.Id==id, null);
             if (vehicle == null)
                 return false;
 
-            await _vehicleRepo.DeleteById(id);
+            await _vehicleRepo.Delete(s=> s.Id == id);
             await _unitOfWork.SaveChangesAsync();
 
             return true;

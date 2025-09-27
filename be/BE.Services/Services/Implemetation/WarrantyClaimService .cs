@@ -139,11 +139,11 @@ namespace BE.Services.Services.Implemetation
 
         public async Task<bool> DeleteWarrantyClaimAsync(Guid id)
         {
-            var claim = await _claimRepo.GetById(id);
+            var claim = await _claimRepo.GetByExpression(s=> s.Id==id, null);
             if (claim == null)
                 return false;
 
-            await _claimRepo.DeleteById(claim);
+            await _claimRepo.Delete(claim => claim.Id == id);
             await _unitOfWork.SaveChangesAsync();
 
             return true;

@@ -71,10 +71,10 @@ namespace BE.Services.Services.Implemetation
 
         public async Task<PagedResult<ServiceHistory>> GetByVehicleId(Guid vehicleId)
         {
-            return await _serviceHistoryRepo.GetAllDataByExpression( new DAL.DTO.QueryOptions<ServiceHistory>
+            return await _serviceHistoryRepo.GetAllDataByExpression(new DAL.DTO.QueryOptions<ServiceHistory>
             {
                 Filter = sh => sh.VehicleId == vehicleId,
-               
+
                 PageNumber = 1,
                 PageSize = int.MaxValue
             });
@@ -82,7 +82,7 @@ namespace BE.Services.Services.Implemetation
 
         public async Task<ServiceHistory> GetById(Guid id)
         {
-            return await _serviceHistoryRepo.GetByExpression( s=> s.Id == id, new List<Func<IQueryable<ServiceHistory>, IQueryable<ServiceHistory>>>
+            return await _serviceHistoryRepo.GetByExpression(s => s.Id == id, new List<Func<IQueryable<ServiceHistory>, IQueryable<ServiceHistory>>>
             {
                 s=> s.Include(s=> s.Vehicle)
             });
@@ -117,7 +117,7 @@ namespace BE.Services.Services.Implemetation
 
             await _serviceHistoryRepo.Insert(history);
             await _unitOfWork.SaveChangesAsync();
-            
+
             return history;
         }
 
@@ -143,11 +143,12 @@ namespace BE.Services.Services.Implemetation
 
         public async Task<bool> DeleteServiceHistoryAsync(Guid id)
         {
-            var history = await _serviceHistoryRepo.GetById(id);
+            var history = await _serviceHistoryRepo.GetByExpression(s => s.Id == id, null);
             if (history == null)
                 return false;
 
-            await _serviceHistoryRepo.DeleteById(id);
+            await _serviceHistoryRepo.Delete(s => s.Id == id);
+
             await _unitOfWork.SaveChangesAsync();
 
             return true;

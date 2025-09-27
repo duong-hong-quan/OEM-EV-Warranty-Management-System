@@ -73,11 +73,11 @@ namespace BE.Services.Services.Implemetation
 
         public async Task<bool> DeletePartAsync(Guid id)
         {
-            var part = await _partRepo.GetById(id);
+            var part = await _partRepo.GetByExpression(s=> s.Id==id, null);
             if (part == null)
                 return false;
 
-            await _partRepo.DeleteById(part);
+            await _partRepo.Delete(s=> s.Id == id);
             await _unitOfWork.SaveChangesAsync();
 
             return true;
