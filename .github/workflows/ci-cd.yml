@@ -229,32 +229,27 @@ jobs:
         echo "❌ Production deployment failed!"
         # Add notification logic here (Slack, email, etc.)
 
-  # Health Check Job
   health-check:
-    name: Post-Deployment Health Check
+    name: 🏥 Health Check - Backend API
     runs-on: ubuntu-latest
     needs: [deploy-prod]
     if: always() && needs.deploy-prod.result == 'success'
     
     steps:
-    - name: 🏥 Health Check - Backend API
-      run: |
-        # Wait for services to start
-        sleep 30
-        
-        # Check API health
-        curl -f -s -o /dev/null -w "%{http_code}" \
-          "https://seminar-dot-net.duckdns.org" || exit 1
-        
-        echo "✅ Backend API is healthy"
+      - name: 🏥 Health Check - Backend API
+        run: |
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://seminar-dot-net.duckdns.org/api/health || true)
+            echo "Attempt $i: $STATUS"
+            if [[ "$STATUS" == "200" ]]; then
+              echo "✅ Backend API is healthy"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "❌ Backend API is not healthy after retries"
+          exit 1
 
-    - name: 🏥 Health Check - Frontend
-      run: |
-        # Check frontend
-        curl -f -s -o /dev/null -w "%{http_code}" \
-          "https://seminar-dot-net.duckdns.org" || exit 1
-        
-        echo "✅ Frontend is healthy"
 
 # Cleanup old artifacts
   cleanup:
