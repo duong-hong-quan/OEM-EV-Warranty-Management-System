@@ -146,7 +146,7 @@ namespace BE.API.Controllers
                 var vehicle = await _vehicleService.GetVehicleByIdAsync(vehicleId);
                 if (vehicle == null)
                     return NotFound($"Vehicle with ID {vehicleId} not found");
-                
+
                 // Assuming vehicle has Parts property - you may need to add this to your service
                 // For now, returning success message
                 return Ok($"Parts for vehicle {vehicleId}");
@@ -156,6 +156,5 @@ namespace BE.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-       
     }
 }

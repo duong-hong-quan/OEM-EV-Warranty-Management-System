@@ -182,7 +182,7 @@ GET    /api/auth/demo/403               # Demo 403 Forbidden
 - **.NET 8.0** - Main framework
 - **ASP.NET Core** - Web API framework
 - **Entity Framework Core** - ORM
-- **SQL Server** - Database
+- **Postgres** - Database
 - **JWT Authentication** - Security
 - **Swagger/OpenAPI** - API documentation
 
@@ -209,7 +209,7 @@ GET    /api/auth/demo/403               # Demo 403 Forbidden
 #### Yêu cầu hệ thống:
 - .NET 8.0 SDK
 - Node.js 18+
-- SQL Server
+- Postgres
 - Docker (optional)
 
 #### Cài đặt Backend:
@@ -232,7 +232,7 @@ npm run dev
 #### System Requirements:
 - .NET 8.0 SDK
 - Node.js 18+
-- SQL Server
+- Postgres
 - Docker (optional)
 
 #### Backend Setup:
