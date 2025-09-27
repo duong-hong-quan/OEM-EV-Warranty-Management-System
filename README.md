@@ -359,7 +359,7 @@ All contributions are welcome! Please create an issue or pull request.
 - **Vị trí**: Team Leader, Middle Software Engineer
 - **Công ty**: TGL Solutions
 - **Email**: [quan.h.duong@tgl-sol.com]
-- **LinkedIn**: [[Your LinkedIn Profile](https://www.linkedin.com/in/hongquan0312/)]
+- **LinkedIn**: [[Quan Duong](https://www.linkedin.com/in/hongquan0312/)]
 
 ---
 
