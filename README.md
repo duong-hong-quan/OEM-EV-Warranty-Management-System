@@ -358,8 +358,8 @@ All contributions are welcome! Please create an issue or pull request.
 - **Tác giả**: Dương Hồng Quân
 - **Vị trí**: Team Leader, Middle Software Engineer
 - **Công ty**: TGL Solutions
-- **Email**: [quanduong@tglsolutions.com]
-- **LinkedIn**: [Your LinkedIn Profile]
+- **Email**: [quan.h.duong@tgl-sol.com]
+- **LinkedIn**: [[Your LinkedIn Profile](https://www.linkedin.com/in/hongquan0312/)]
 
 ---
 
