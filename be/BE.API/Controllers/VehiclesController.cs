@@ -149,7 +149,7 @@ namespace BE.API.Controllers
 
                 // Assuming vehicle has Parts property - you may need to add this to your service
                 // For now, returning success message
-                return Ok($"Parts for vehicle {vehicleId}");
+                return Ok(vehicle);
             }
             catch (Exception ex)
             {
