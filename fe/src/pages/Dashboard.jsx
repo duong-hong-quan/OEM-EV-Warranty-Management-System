@@ -1,32 +1,54 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import StatCard from "@/components/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2 } from "lucide-react";
+import { api } from "@/lib/api";
 
 export default function Dashboard() {
-  // Demo stats
-  const stats = [
-    {
-      title: "Vehicles",
-      value: 128,
-      color: "from-blue-500 to-blue-600",
-    },
-    {
-      title: "Customers",
-      value: 97,
-      color: "from-green-500 to-green-600",
-    },
-    {
-      title: "Parts Attached",
-      value: 312,
-      color: "from-yellow-500 to-yellow-600",
-    },
-    {
-      title: "Warranty Claims",
-      value: 14,
-      color: "from-red-500 to-red-600",
-    },
-  ];
+  const [stats, setStats] = useState([
+    { title: "Vehicles", value: 0, color: "from-blue-500 to-blue-600" },
+    { title: "Customers", value: 0, color: "from-emerald-500 to-emerald-600" },
+    { title: "Parts Attached", value: 0, color: "from-amber-500 to-amber-600" },
+    { title: "Warranty Claims", value: 0, color: "from-rose-500 to-rose-600" },
+  ]);
+
+  useEffect(() => {
+    const countFromPaged = (res) => {
+      const data = res?.data;
+      if (!data) return 0;
+      if (typeof data.totalItems === "number") return data.totalItems;
+      if (Array.isArray(data.items)) return data.items.length;
+      if (Array.isArray(data)) return data.length;
+      return 0;
+    };
+
+    const fetchCounts = async () => {
+      try {
+        const [vehiclesRes, customersRes, partsRes, claimsRes] = await Promise.allSettled([
+          api.get("/api/vehicles"),
+          api.get("/api/customers"),
+          api.get("/api/parts"),
+          api.get("/api/warranty-claim"),
+        ]);
+
+        const vehicles = vehiclesRes.status === "fulfilled" ? countFromPaged(vehiclesRes.value) : 0;
+        const customers = customersRes.status === "fulfilled" ? countFromPaged(customersRes.value) : 0;
+        const parts = partsRes.status === "fulfilled" ? countFromPaged(partsRes.value) : 0;
+        const claims = claimsRes.status === "fulfilled" ? countFromPaged(claimsRes.value) : 0;
+
+        setStats((prev) => [
+          { ...prev[0], value: vehicles },
+          { ...prev[1], value: customers },
+          { ...prev[2], value: parts },
+          { ...prev[3], value: claims },
+        ]);
+      } catch {
+        // ignore on dashboard; cards will stay at 0
+      }
+    };
+
+    fetchCounts();
+  }, []);
 
   const features = [
     "Vehicle & Customer Registration",
@@ -36,16 +58,16 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="p-8 min-h-screen">
       {/* Header */}
-      <Card className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+      <Card className="mb-8 bg-white/60 backdrop-blur shadow-sm border border-slate-200">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             EV Warranty Management Dashboard
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-blue-100">
+          <p className="text-slate-600">
             Monitor your EV ecosystem with vehicles, parts, services, and
             warranty claims — all in one place.
           </p>
@@ -55,34 +77,35 @@ export default function Dashboard() {
       {/* Stats */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-10">
         {stats.map((s, i) => (
-          <Card
-            key={i}
-            className={`bg-gradient-to-r ${s.color} text-white shadow-md`}
-          >
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-sm opacity-80">{s.title}</p>
-                <p className="text-3xl font-bold">{s.value}</p>
+          <div key={i} className="rounded-xl shadow-sm overflow-hidden">
+            <div className={`bg-gradient-to-r ${s.color} text-white`}>
+              <div className="p-6 flex items-center justify-between">
+                <div>
+                  <p className="text-sm/5 opacity-80">{s.title}</p>
+                  <p className="text-4xl font-semibold tracking-tight">{s.value}</p>
+                </div>
+                <div className="text-4xl" />
               </div>
-              <div className="text-4xl">{s.icon}</div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
 
       {/* Features */}
-      <Card className="shadow-sm">
+      <Card className="shadow-sm border border-slate-200">
         <CardHeader>
-          <CardTitle>Features</CardTitle>
+          <CardTitle className="text-slate-800">Features</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700">
             {features.map((f, idx) => (
               <li
                 key={idx}
-                className="flex items-center gap-2 p-3 rounded-md hover:bg-gray-50 transition"
+                className="flex items-center gap-3 p-3 rounded-md hover:bg-slate-50 transition"
               >
-                <CheckCircle2 className="h-5 w-5 text-blue-500" />
+                <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-100 text-blue-600">
+                  <CheckCircle2 className="h-4 w-4" />
+                </span>
                 <span className="text-base">{f}</span>
               </li>
             ))}

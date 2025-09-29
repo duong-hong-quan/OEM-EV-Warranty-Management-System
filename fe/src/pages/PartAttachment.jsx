@@ -21,10 +21,12 @@ import {
   FormControl,
 } from "@/components/ui/form"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { api } from "@/lib/api"
+import VehicleSelect from "@/components/VehicleSelect"
 
 // Validation schema with zod
 const formSchema = z.object({
-  vin: z.string().min(1, "Vehicle VIN is required"),
+  vehicleId: z.string().uuid({ message: "Vehicle is required" }),
   partName: z.string().min(1, "Part name is required"),
   serial: z.string().min(1, "Serial number is required"),
 })
@@ -35,7 +37,7 @@ export default function PartAttachment() {
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: { vin: "", partName: "", serial: "" },
+    defaultValues: { vehicleId: "", partName: "", serial: "" },
   })
 
   const onSubmit = async (values) => {
@@ -43,17 +45,13 @@ export default function PartAttachment() {
     setLoading(true)
 
     try {
-      const res = await fetch("http://localhost:5165/api/parts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          vehicleId: values.vin,
-          name: values.partName,
-          serialNumber: values.serial,
-        }),
+      const res = await api.post("/api/parts", {
+        VehicleId: values.vehicleId,
+        Name: values.partName,
+        SerialNumber: values.serial,
       })
 
-      if (res.ok) {
+      if (res.status === 201 || res.status === 200) {
         setStatus({ type: "success", message: "✅ Part attached successfully!" })
         form.reset()
       } else {
@@ -67,35 +65,54 @@ export default function PartAttachment() {
   }
 
   return (
-    <Card className="max-w-lg mx-auto mt-6">
+    <Card className="max-w-2xl mx-auto mt-6 shadow-sm border border-slate-200">
       <CardHeader>
-        <CardTitle>Attach Part Serial to Vehicle</CardTitle>
+        <CardTitle className="text-slate-800">Attach Part Serial to Vehicle</CardTitle>
       </CardHeader>
       <CardContent>
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-            {["vin", "partName", "serial"].map((field) => (
-              <FormField
-                key={field}
-                control={form.control}
-                name={field}
-                render={({ field: f }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {field === "vin"
-                        ? "Vehicle VIN"
-                        : field === "partName"
-                        ? "Part Name"
-                        : "Part Serial Number"}
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder={`Enter ${field}`} {...f} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
+            <FormField
+              control={form.control}
+              name="vehicleId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Vehicle</FormLabel>
+                  <FormControl>
+                    <VehicleSelect value={field.value} onChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="partName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Part Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter part name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="serial"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Part Serial Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter serial" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading && <Loader2 className="animate-spin h-4 w-4 mr-2" />}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -6,9 +7,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Loader2 } from "lucide-react"
+import VehicleSelect from "@/components/VehicleSelect"
 
 export default function WarrantyClaim() {
-  const [vin, setVin] = useState("")
+  const [vehicleId, setVehicleId] = useState("")
   const [report, setReport] = useState("")
   const [diagnostic, setDiagnostic] = useState("")
   const [images, setImages] = useState([])
@@ -17,9 +19,8 @@ export default function WarrantyClaim() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    fetch("http://localhost:5165/api/warrantyclaims")
-      .then((res) => res.json())
-      .then((data) => setClaims(data))
+    api.get("/api/warranty-claim")
+      .then((res) => setClaims(res.data?.items || res.data || []))
       .catch(() => setStatus("Failed to load claims."))
   }, [])
 
@@ -28,26 +29,20 @@ export default function WarrantyClaim() {
     setStatus("")
     setLoading(true)
     try {
-      const res = await fetch("http://localhost:5165/api/warrantyclaims", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          vehicleId: vin,
-          report,
-          diagnosticInfo: diagnostic,
-          imageUrls: [], // TODO: handle real image upload
-        }),
+      const res = await api.post("/api/warranty-claim", {
+        VehicleId: vehicleId,
+        Report: report,
+        DiagnosticInfo: diagnostic,
+        ImageUrls: [],
       })
 
-      if (res.ok) {
+      if (res.status === 201 || res.status === 200) {
         setStatus("✅ Claim submitted successfully!")
-        setVin("")
+        setVehicleId("")
         setReport("")
         setDiagnostic("")
         setImages([])
-        // Refresh claims
-        const updated = await res.json()
-        setClaims((prev) => [...prev, updated])
+        setClaims((prev) => [...prev, res.data])
       } else {
         setStatus("❌ Failed to submit claim.")
       }
@@ -72,21 +67,15 @@ export default function WarrantyClaim() {
   return (
     <div className="p-6 space-y-8">
       {/* Create Claim Form */}
-      <Card>
+      <Card className="shadow-sm border border-slate-200">
         <CardHeader>
-          <CardTitle>Create Warranty Claim</CardTitle>
+          <CardTitle className="text-slate-800">Create Warranty Claim</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <Label htmlFor="vin">Vehicle VIN</Label>
-              <Input
-                id="vin"
-                value={vin}
-                onChange={(e) => setVin(e.target.value)}
-                placeholder="Enter VIN"
-                required
-              />
+              <Label>Vehicle</Label>
+              <VehicleSelect value={vehicleId} onChange={setVehicleId} placeholder="Search vehicles..." />
             </div>
             <div>
               <Label htmlFor="report">Report</Label>
@@ -132,7 +121,7 @@ export default function WarrantyClaim() {
                 </div>
               )}
             </div>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || !vehicleId}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Submit Claim
             </Button>
@@ -142,9 +131,9 @@ export default function WarrantyClaim() {
       </Card>
 
       {/* Claims Table */}
-      <Card>
+      <Card className="shadow-sm border border-slate-200">
         <CardHeader>
-          <CardTitle>Claim Status Tracking</CardTitle>
+          <CardTitle className="text-slate-800">Claim Status Tracking</CardTitle>
         </CardHeader>
         <CardContent>
           {claims.length === 0 ? (
@@ -152,18 +141,18 @@ export default function WarrantyClaim() {
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full border text-sm">
-                <thead className="bg-gray-100 text-left">
+                <thead className="bg-slate-50 text-left">
                   <tr>
-                    <th className="border px-3 py-2">Date</th>
-                    <th className="border px-3 py-2">Status</th>
-                    <th className="border px-3 py-2">Report</th>
+                    <th className="border px-3 py-2 text-xs font-semibold uppercase text-slate-500">Date</th>
+                    <th className="border px-3 py-2 text-xs font-semibold uppercase text-slate-500">Status</th>
+                    <th className="border px-3 py-2 text-xs font-semibold uppercase text-slate-500">Report</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {claims.map((c) => (
+                  {claims.map((c, idx) => (
                     <tr
                       key={c.id}
-                      className="hover:bg-gray-50 transition-colors"
+                      className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/60"}
                     >
                       <td className="border px-3 py-2">
                         {new Date(c.claimDate).toLocaleDateString()}

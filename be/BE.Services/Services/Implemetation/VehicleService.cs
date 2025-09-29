@@ -8,6 +8,7 @@ using BE.DAL.DTO;
 using BE.DAL.GenericRepository;
 using BE.DAL.Models;
 using BE.DAL.UOW;
+using Microsoft.EntityFrameworkCore;
 
 namespace BE.Services.Services.Implemetation
 {
@@ -93,7 +94,11 @@ namespace BE.Services.Services.Implemetation
             {
                 Filter = null,
                 PageNumber = 1,
-                PageSize = int.MaxValue
+                PageSize = int.MaxValue,
+                Includes = new List<Func<IQueryable<Vehicle>, IQueryable<Vehicle>>>
+                {
+                    q => q.Select(v => v).Include(v => v.Customer)
+                }
             });
         }
 

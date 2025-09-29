@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import axios from "axios"
+import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -7,10 +7,11 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Loader2 } from "lucide-react"
-import { Table } from "@/components/ui/table";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 
 export default function VehicleRegistration() {
   const [vin, setVin] = useState("")
+  const [vehicleName, setVehicleName] = useState("")
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [email, setEmail] = useState("")
@@ -28,8 +29,10 @@ export default function VehicleRegistration() {
   const fetchVehicles = async () => {
     setLoading(true)
     try {
-      const res = await axios.get("http://localhost:5165/api/Vehicles")
-      setVehicles(res.data)
+      const res = await api.get("/api/vehicles")
+      const data = res.data
+      const items = Array.isArray(data) ? data : (data?.items || [])
+      setVehicles(items)
     } catch {
       setStatus({ type: "error", message: "Failed to fetch vehicles." })
     }
@@ -41,10 +44,11 @@ export default function VehicleRegistration() {
     setSubmitting(true)
     setStatus(null)
     try {
-      const customerRes = await axios.post("http://localhost:5165/api/Customers", { name, phone, email, address })
-      await axios.post("http://localhost:5165/api/Vehicles", { vin, customerId: customerRes.data.id })
+      const customerRes = await api.post("/api/customers", { Name: name, Phone: phone, Email: email, Address: address })
+      const customerId = customerRes.data?.id || customerRes.data?.Id
+      await api.post("/api/vehicles", { VIN: vin, VehicleName: vehicleName, CustomerId: customerId })
       setStatus({ type: "success", message: "Vehicle registered successfully!" })
-      setVin(""); setName(""); setPhone(""); setEmail(""); setAddress("")
+      setVin(""); setVehicleName(""); setName(""); setPhone(""); setEmail(""); setAddress("")
       fetchVehicles()
     } catch {
       setStatus({ type: "error", message: "Error registering vehicle." })
@@ -53,30 +57,27 @@ export default function VehicleRegistration() {
   }
 
   const filteredVehicles = vehicles.filter(v =>
-    v.vin.toLowerCase().includes(search.toLowerCase()) ||
-    (v.customerName && v.customerName.toLowerCase().includes(search.toLowerCase()))
+    (v.vin || v.VIN || "").toLowerCase().includes(search.toLowerCase()) ||
+    (v.vehicleName || v.VehicleName || "").toLowerCase().includes(search.toLowerCase()) ||
+    (((v.customer && (v.customer.name || v.customer.Name)) || "").toLowerCase().includes(search.toLowerCase()))
   )
-
-  const columns = [
-    { Header: "VIN", accessor: "vin" },
-    { Header: "Customer Name", accessor: "customerName" },
-    { Header: "Phone", accessor: "customerPhone" },
-    { Header: "Email", accessor: "customerEmail" },
-    { Header: "Address", accessor: "customerAddress" }
-  ]
 
   return (
     <div className="p-6 space-y-6">
       {/* Form */}
-      <Card>
+      <Card className="shadow-sm border border-slate-200">
         <CardHeader>
-          <CardTitle>Register Vehicle by VIN</CardTitle>
+          <CardTitle className="text-slate-800">Register Vehicle by VIN</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
             <div>
               <Label htmlFor="vin">VIN</Label>
               <Input id="vin" value={vin} onChange={e => setVin(e.target.value)} placeholder="Enter VIN" />
+            </div>
+            <div>
+              <Label htmlFor="vehicleName">Vehicle Name</Label>
+              <Input id="vehicleName" value={vehicleName} onChange={e => setVehicleName(e.target.value)} placeholder="Enter vehicle name" />
             </div>
             <div>
               <Label htmlFor="name">Customer Name</Label>
@@ -111,16 +112,16 @@ export default function VehicleRegistration() {
       </Card>
 
       {/* Search + Table */}
-      <Card>
+      <Card className="shadow-sm border border-slate-200">
         <CardHeader>
-          <CardTitle>Registered Vehicles</CardTitle>
+          <CardTitle className="text-slate-800">Registered Vehicles</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center gap-2">
             <Input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search by VIN or customer name"
+              placeholder="Search by VIN, vehicle name or customer name"
               className="max-w-sm"
             />
           </div>
@@ -131,7 +132,28 @@ export default function VehicleRegistration() {
             </div>
           ) : (
             <ScrollArea className="h-[400px] rounded-md border">
-              <Table columns={columns} data={filteredVehicles} />
+              <Table>
+                <TableHeader className="bg-gray-50">
+                  <TableRow>
+                    <TableHead className="px-3 py-2 text-xs font-semibold uppercase text-gray-500 whitespace-nowrap">VIN</TableHead>
+                    <TableHead className="px-3 py-2 text-xs font-semibold uppercase text-gray-500">Vehicle Name</TableHead>
+                    <TableHead className="px-3 py-2 text-xs font-semibold uppercase text-gray-500">Customer Name</TableHead>
+                    <TableHead className="px-3 py-2 text-xs font-semibold uppercase text-gray-500">Customer Email</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredVehicles.map((row, idx) => (
+                    <TableRow key={row.id || row.Id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50/60"}>
+                      <TableCell className="px-3 py-2 font-mono whitespace-nowrap">{row.vin || row.VIN}</TableCell>
+                      <TableCell className="px-3 py-2">{row.vehicleName || row.VehicleName}</TableCell>
+                      <TableCell className="px-3 py-2">{(row.customer && (row.customer.name || row.customer.Name)) || ""}</TableCell>
+                      <TableCell className="px-3 py-2 whitespace-nowrap">
+                        <span className="inline-block max-w-[220px] truncate align-middle">{(row.customer && (row.customer.email || row.customer.Email)) || ""}</span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </ScrollArea>
           )}
         </CardContent>
