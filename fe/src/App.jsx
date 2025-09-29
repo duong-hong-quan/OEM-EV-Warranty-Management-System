@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import VehicleRegistration from "./pages/VehicleRegistration";
 import PartAttachment from "./pages/PartAttachment";
@@ -30,10 +30,13 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<AdminLayout><Dashboard /></AdminLayout>} />
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/vehicle-registration" element={<AdminLayout><VehicleRegistration /></AdminLayout>} />
         <Route path="/part-attachment" element={<AdminLayout><PartAttachment /></AdminLayout>} />
         <Route path="/service-history" element={<AdminLayout><ServiceHistory /></AdminLayout>} />
         <Route path="/warranty-claim" element={<AdminLayout><WarrantyClaim /></AdminLayout>} />
+        {/* Catch all unmatched routes and redirect to dashboard */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
