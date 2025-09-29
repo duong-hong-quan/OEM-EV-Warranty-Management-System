@@ -77,9 +77,9 @@ export default function ServiceHistory() {
               <Table>
                 <TableHeader className="bg-slate-50">
                   <TableRow>
-                    <TableHead className="px-3 py-2 text-xs font-semibold uppercase text-slate-500">Date</TableHead>
-                    <TableHead className="px-3 py-2 text-xs font-semibold uppercase text-slate-500">Description</TableHead>
-                    <TableHead className="px-3 py-2 text-xs font-semibold uppercase text-slate-500">Technician</TableHead>
+                    <TableHead className="px-3 py-2 text-xs font-semibold uppercase text-slate-500 text-center">Date</TableHead>
+                    <TableHead className="px-3 py-2 text-xs font-semibold uppercase text-slate-500 text-center">Description</TableHead>
+                    <TableHead className="px-3 py-2 text-xs font-semibold uppercase text-slate-500 text-center">Technician</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

@@ -6,10 +6,10 @@ import { api } from "@/lib/api";
 
 export default function Dashboard() {
   const [stats, setStats] = useState([
-    { title: "Vehicles", value: 0, color: "from-blue-500 to-blue-600" },
-    { title: "Customers", value: 0, color: "from-emerald-500 to-emerald-600" },
-    { title: "Parts Attached", value: 0, color: "from-amber-500 to-amber-600" },
-    { title: "Warranty Claims", value: 0, color: "from-rose-500 to-rose-600" },
+    { title: "Vehicles", value: 0, color: "from-gray-800 to-gray-900" },
+    { title: "Customers", value: 0, color: "from-gray-700 to-gray-800" },
+    { title: "Parts Attached", value: 0, color: "from-gray-600 to-gray-700" },
+    { title: "Warranty Claims", value: 0, color: "from-gray-500 to-gray-600" },
   ]);
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function Dashboard() {
       {/* Header */}
       <Card className="mb-8 bg-white/60 backdrop-blur shadow-sm border border-slate-200">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent">
             EV Warranty Management Dashboard
           </CardTitle>
         </CardHeader>
@@ -103,7 +103,7 @@ export default function Dashboard() {
                 key={idx}
                 className="flex items-center gap-3 p-3 rounded-md hover:bg-slate-50 transition"
               >
-                <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-100 text-blue-600">
+                <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-100 text-gray-800">
                   <CheckCircle2 className="h-4 w-4" />
                 </span>
                 <span className="text-base">{f}</span>

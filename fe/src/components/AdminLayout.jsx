@@ -29,9 +29,9 @@ export default function AdminLayout({ children }) {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Sidebar (fixed) */}
       <aside className="fixed left-0 top-0 h-screen w-64 bg-white/95 backdrop-blur border-r flex flex-col shadow-sm">
-        <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <div className="p-6 border-b bg-gradient-to-r from-gray-800 to-gray-900 text-white">
           <h2 className="text-lg font-semibold tracking-wide">EV Warranty Admin</h2>
-          <div className="text-xs text-blue-100 mt-1">
+          <div className="text-xs text-gray-300 mt-1">
             {user ? `${user.name} • ${role}` : "Guest"}
           </div>
         </div>
@@ -45,11 +45,11 @@ export default function AdminLayout({ children }) {
                 className={cn(
                   "group relative flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all",
                   active
-                    ? "bg-blue-50 text-blue-700 shadow-[inset_2px_0_0_0_theme(colors.blue.600)]"
+                    ? "bg-gray-100 text-gray-800 shadow-[inset_2px_0_0_0_theme(colors.gray.800)]"
                     : "text-slate-700 hover:bg-slate-50"
                 )}
               >
-                <span className={cn("shrink-0", active ? "text-blue-700" : "text-slate-500 group-hover:text-slate-700")}>{item.icon}</span>
+                <span className={cn("shrink-0", active ? "text-gray-800" : "text-slate-500 group-hover:text-slate-700")}>{item.icon}</span>
                 <span className="truncate">{item.label}</span>
               </Link>
             );

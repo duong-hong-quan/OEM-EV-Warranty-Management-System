@@ -143,9 +143,9 @@ export default function WarrantyClaim() {
               <table className="min-w-full border text-sm">
                 <thead className="bg-slate-50 text-left">
                   <tr>
-                    <th className="border px-3 py-2 text-xs font-semibold uppercase text-slate-500">Date</th>
-                    <th className="border px-3 py-2 text-xs font-semibold uppercase text-slate-500">Status</th>
-                    <th className="border px-3 py-2 text-xs font-semibold uppercase text-slate-500">Report</th>
+                    <th className="border px-3 py-2 text-xs font-semibold uppercase text-slate-500 text-center">Date</th>
+                    <th className="border px-3 py-2 text-xs font-semibold uppercase text-slate-500 text-center">Status</th>
+                    <th className="border px-3 py-2 text-xs font-semibold uppercase text-slate-500 text-center">Report</th>
                   </tr>
                 </thead>
                 <tbody>
