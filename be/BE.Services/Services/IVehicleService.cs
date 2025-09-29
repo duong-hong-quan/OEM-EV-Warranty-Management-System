@@ -11,7 +11,7 @@ namespace BE.Services.Services
 {
     public interface IVehicleService
     {
-        Task<PagedResult<Vehicle>> GetAllVehiclesAsync();
+        Task<PagedResult<VehicleWithDetailsDTO>> GetAllVehiclesAsync();
          Task<PagedResult<Part>> GetVehicleByIdAsync(Guid id);
         Task<Vehicle> CreateVehicleAsync(VehicleDTO vehicleDto);
         Task<Vehicle> UpdateVehicleAsync(VehicleDTO vehicleDto);

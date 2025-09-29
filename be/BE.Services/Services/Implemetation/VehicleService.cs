@@ -88,18 +88,69 @@ namespace BE.Services.Services.Implemetation
         }
 
         // New DTO-based CRUD methods
-        public async Task<PagedResult<Vehicle>> GetAllVehiclesAsync()
+        public async Task<PagedResult<VehicleWithDetailsDTO>> GetAllVehiclesAsync()
         {
-            return await _vehicleRepo.GetAllDataByExpression(new QueryOptions<Vehicle>
+            var vehiclesResult = await _vehicleRepo.GetAllDataByExpression(new QueryOptions<Vehicle>
             {
                 Filter = null,
                 PageNumber = 1,
                 PageSize = int.MaxValue,
                 Includes = new List<Func<IQueryable<Vehicle>, IQueryable<Vehicle>>>
                 {
-                    q => q.Select(v => v).Include(v => v.Customer)
+                    q => q.Select(v => v)
+                        .Include(v => v.Customer)
+                        .Include(v => v.Parts)
+                        .Include(v => v.ServiceHistories)
+                        .Include(v => v.WarrantyClaims)
                 }
             });
+
+            // Convert to DTO to avoid circular reference
+            var vehicleDTOs = vehiclesResult.Items.Select(v => new VehicleWithDetailsDTO
+            {
+                Id = v.Id,
+                VIN = v.VIN,
+                VehicleName = v.VehicleName,
+                CustomerId = v.CustomerId,
+                Customer = v.Customer != null ? new CustomerDTO
+                {
+                    Id = v.Customer.Id,
+                    Name = v.Customer.Name,
+                    Email = v.Customer.Email,
+                    Phone = v.Customer.Phone,
+                    Address = v.Customer.Address
+                } : null,
+                Parts = v.Parts?.Select(p => new PartDTO
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    SerialNumber = p.SerialNumber
+                }).ToList(),
+                ServiceHistories = v.ServiceHistories?.Select(sh => new ServiceHistoryDTO
+                {
+                    Id = sh.Id,
+                    ServiceDate = sh.ServiceDate,
+                    Description = sh.Description,
+                    Technician = sh.Technician
+                }).ToList(),
+                WarrantyClaims = v.WarrantyClaims?.Select(wc => new WarrantyClaimDTO
+                {
+                    Id = wc.Id,
+                    ClaimDate = wc.ClaimDate,
+                    Status = wc.Status,
+                    Report = wc.Report,
+                    DiagnosticInfo = wc.DiagnosticInfo,
+                    ImageUrls = wc.ImageUrls
+                }).ToList()
+            }).ToList();
+
+            return new PagedResult<VehicleWithDetailsDTO>
+            {
+                Items = vehicleDTOs,
+                TotalItems = vehiclesResult.TotalItems,
+                PageSize = vehiclesResult.PageSize,
+                TotalPages = vehiclesResult.TotalPages
+            };
         }
 
         public async Task<PagedResult<Part>> GetVehicleByIdAsync(Guid id)
